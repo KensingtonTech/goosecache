@@ -2,7 +2,7 @@
 
 const generateKey = require('./generate-key');
 
-const recoverObjectId = require('./recover-objectid');
+const noop = () => {};
 
 let hasBeenExtended = false;
 
@@ -21,22 +21,31 @@ module.exports = function (mongoose, cache) {
   };
 
   function extend(Aggregate) {
-    const exec = Aggregate.prototype.exec;
+    const mongooseExec = Aggregate.prototype.exec;
 
-    Aggregate.prototype.exec = function (callback = function () {}) {
-      if (!this.hasOwnProperty('_ttl')) return exec.apply(this, arguments);
+    Aggregate.prototype.exec = function (callback = noop) {
+      if (!this.hasOwnProperty('_ttl')) {
+        return mongooseExec.apply(this, arguments);
+      }
+
       const key = this._key || this.getCacheKey();
       const ttl = this._ttl;
       return new Promise((resolve, reject) => {
+        console.log('getting results from cache with cache.get()');
         cache.get(key, (err, cachedResults) => {
           //eslint-disable-line handle-callback-err
           if (cachedResults != null) {
-            cachedResults = recoverObjectId(mongoose, cachedResults);
+            console.log('got a cached result!'); // cachedResults = recoverObjectId(mongoose, cachedResults);
+
+            console.log('running callback()');
             callback(null, cachedResults);
+            console.log('returning with resolve()');
             return resolve(cachedResults);
           }
 
-          exec.call(this).then(results => {
+          console.log('didn\'t find a cached result :( -- fetching from mongo');
+          mongooseExec.call(this).then(results => {
+            console.log('setting result in cache with cache.set()');
             cache.set(key, results, ttl, () => {
               callback(null, results);
               resolve(results);

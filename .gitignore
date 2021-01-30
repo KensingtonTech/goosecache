@@ -30,3 +30,5 @@ node_modules
 
 out
 package-lock.json
+
+*.tgz

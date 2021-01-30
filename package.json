@@ -1,7 +1,8 @@
 {
-  "name": "recachegoose",
-  "version": "8.1.0",
-  "description": "Mongoose caching that actually works.",
+  "name": "goosecache",
+  "private": true,
+  "version": "9.0.0",
+  "description": "Mongoose cacheing that actually works",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -13,7 +14,7 @@
     "sha1": "^1.1.1"
   },
   "peerDependencies": {
-    "mongoose": "^5.0.1"
+    "mongoose": "^5.11.13"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.10",
@@ -31,12 +32,11 @@
     "test": "npm run lint && npm run build && nyc --reporter=html --reporter=text mocha --exit",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "lint": "eslint .",
-    "build": "babel src --out-dir dist",
-    "prepublish": "npm run lint && npm run build"
+    "build": "babel src --out-dir dist"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aalfiann/recachegoose.git"
+    "url": "https://github.com/kensingtontech/goosecache.git"
   },
   "keywords": [
     "cache",
@@ -47,10 +47,10 @@
     "store",
     "ttl"
   ],
-  "author": "Bob Lauer <rlauer@gmail.com>",
+  "author": "Tim Underhay <tim.underhay@knowledgekta.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/aalfiann/recachegoose/issues"
+    "url": "https://github.com/kensingtontech/goosecache/issues"
   },
-  "homepage": "https://github.com/aalfiann/recachegoose"
+  "homepage": "https://github.com/kensingtontech/goosecache"
 }

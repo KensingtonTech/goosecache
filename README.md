@@ -1,13 +1,22 @@
-> This is a fork version of [cachegoose](https://github.com/boblauer/cachegoose) with following differences :
-- Minimum NodeJS 10
-- Removed old libraries
-- Fixing all vulnerables
-- Up to date
-- Replace [cacheman](https://github.com/cayasso/cacheman) with [recacheman](https://github.com/aalfiann/recacheman)
+> This is a fork of [recachegoose](https://github.com/aalfiann/recachegoose) with these differences:
+- Renamed to GooseCache
+- Includes TypeScript definitions
+- Added additional methods to Model.Query prototype: setDerivedKey(), cacheGetScript(), postCacheSetScript(), postCacheSetDeriveLastArg()
+- Supports calls to custom Redis Lua scripts which have been loaded by script load, both for fetching documents with a Lua script, and for running a script immediately following a cache set, say for instance, for post-processing / indirection.
+- clearCache() also includes an async method (returns a Promise)
+- Added ability to access Redis client through accessor gooseCache.redis
+- Eliminated redundant calls to Redis
+- Eliminated unnecessary recoverObjectId
+- Eliminated unneeded additional Cache layer in favour of a single GooseCache class
+- Reimplemented as JavaScript class
+- A prefix is no longer added to Redis keys
+- Replaced [cacheman](https://github.com/cayasso/cacheman) with [recacheman](https://github.com/aalfiann/recacheman)
 
-# recachegoose #
+### Note: Query aggregation has not yet been updated.  And there is now tons of debugging code in the lib, which is admittedly ugly.  It will be removed in the near future.  Stay tuned.
 
-#### Mongoose caching that actually works. ####
+# GooseCache #
+
+#### Mongoose cacheing that actually works. ####
 
 [![NPM](https://nodei.co/npm/recachegoose.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/recachegoose/)  
   
@@ -21,7 +30,7 @@
 
 ## About ##
 
-A Mongoose caching module that works exactly how you would expect it to, with the latest version of Mongoose.
+A Mongoose cacheing module that actually works.
 
 > Important:  
   If you are using Mongoose 4.x or below, you have to use original [cachegoose](https://github.com/boblauer/cachegoose) and use version <= 4.x of it.
@@ -125,7 +134,7 @@ function clearChildrenByParentIdCache(parentId, cb) {
 
 If you call `cachegoose.clearCache(null, cb)` without passing a cache key as the first parameter, the entire cache will be cleared for all queries.
 
-## Caching populated documents ##
+## Cacheing Populated Documents ##
 
 When a document is returned from the cache, cachegoose will [hydrate](http://mongoosejs.com/docs/api.html#model_Model.hydrate) it, which initializes it's virtuals/methods. Hydrating a populated document will discard any populated fields (see [Automattic/mongoose#4727](https://github.com/Automattic/mongoose/issues/4727)). To cache populated documents without losing child documents, you must use `.lean()`, however if you do this you will not be able to use any virtuals/methods (it will be a plain object).
 

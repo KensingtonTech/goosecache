@@ -11,10 +11,6 @@
     "mocha"
   ],
   "rules": {
-    "array-bracket-spacing": [
-      "error",
-      "never"
-    ],
     "arrow-body-style": "off",
     "arrow-parens": [
       "error",
@@ -32,7 +28,7 @@
     ],
     "brace-style": [
       "error",
-      "1tbs",
+      "stroustrup",
       {
         "allowSingleLine": true
       }
@@ -112,14 +108,6 @@
         "allowParens": true
       }
     ],
-    "no-console": [
-      "error",
-      {
-        "allow": [
-          "error"
-        ]
-      }
-    ],
     "no-const-assign": "error",
     "no-debugger": "error",
     "no-empty": "error",
@@ -133,7 +121,7 @@
     "no-multiple-empty-lines": [
       "error",
       {
-        "max": 2
+        "max": 3
       }
     ],
     "no-multi-spaces": "error",
@@ -162,10 +150,6 @@
       "always"
     ],
     "one-var": [
-      "error",
-      "never"
-    ],
-    "padded-blocks": [
       "error",
       "never"
     ],
