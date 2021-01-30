@@ -16,24 +16,14 @@
 
 # GooseCache #
 
-#### Mongoose cacheing that actually works. ####
-
-[![NPM](https://nodei.co/npm/recachegoose.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/recachegoose/)  
-  
-[![npm version](https://img.shields.io/npm/v/recachegoose.svg?style=flat-square)](https://www.npmjs.org/package/recachegoose)
-[![Build Status](https://travis-ci.com/aalfiann/recachegoose.svg?branch=master)](https://travis-ci.com/aalfiann/recachegoose)
-[![Coverage Status](https://coveralls.io/repos/github/aalfiann/recachegoose/badge.svg?branch=master)](https://coveralls.io/github/aalfiann/recachegoose?branch=master)
-[![Known Vulnerabilities](https://snyk.io//test/github/aalfiann/recachegoose/badge.svg?targetFile=package.json)](https://snyk.io//test/github/aalfiann/recachegoose?targetFile=package.json)
-![License](https://img.shields.io/npm/l/recachegoose)
-![NPM download/month](https://img.shields.io/npm/dm/recachegoose.svg)
-![NPM download total](https://img.shields.io/npm/dt/recachegoose.svg)  
+#### Mongoose cacheing module. ####
 
 ## About ##
 
-A Mongoose cacheing module that actually works.
+A Mongoose cacheing module, with Redis Lua scripting support.
 
 > Important:  
-  If you are using Mongoose 4.x or below, you have to use original [cachegoose](https://github.com/boblauer/cachegoose) and use version <= 4.x of it.
+  Compatible only with versions of Mongoose >= 5.0.0.
 
 
 

@@ -2,15 +2,13 @@
   "name": "goosecache",
   "private": true,
   "version": "9.0.0",
-  "description": "Mongoose cacheing that actually works",
+  "description": "Mongoose cacheing",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
-    "recacheman": "^2.2.4",
-    "recacheman-file": "^0.2.5",
-    "recacheman-redis": "^2.1.5",
+    "@kensingtontech/recacheman": "^2.2.7",
     "sha1": "^1.1.1"
   },
   "peerDependencies": {

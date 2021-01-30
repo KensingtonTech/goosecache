@@ -1,6 +1,6 @@
 'use strict';
 
-const Cacheman = require('recacheman');
+const Cacheman = require('@kensingtontech/recacheman');
 
 const noop = () => {};
 
