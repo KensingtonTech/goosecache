@@ -19,11 +19,15 @@ export declare class GooseCache {
 
 	clearCache(customKey: string | null, cb: function): void;
 
-	async clearCache(customKey: string | null): Promise<void>;
+	async clearCachePromise(customKey: string | null): Promise<void>;
 
 	get(key: string, cb?: function);
+	
+	async getPromise(key: string);
 
 	set(key: string, value: any, ttl: number, cb?: function);
+
+	async setPromise(key: string, value: any, ttl: number);
 
 	evalSha(...args);
 

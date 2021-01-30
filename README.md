@@ -3,7 +3,7 @@
 - Includes TypeScript definitions
 - Added additional methods to Model.Query prototype: setDerivedKey(), cacheGetScript(), postCacheSetScript(), postCacheSetDeriveLastArg()
 - Supports calls to custom Redis Lua scripts which have been loaded by script load, both for fetching documents with a Lua script, and for running a script immediately following a cache set, say for instance, for post-processing / indirection.
-- clearCache() also includes an async method (returns a Promise)
+- New methods that return a promise: clearCachePromise(), getPromise(), setPromise()
 - Added ability to access Redis client through accessor gooseCache.redis
 - Eliminated redundant calls to Redis
 - Eliminated unnecessary recoverObjectId

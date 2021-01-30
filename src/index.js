@@ -41,7 +41,7 @@ class GooseCache {
 
 
 
-  async clearCache(customKey) {
+  async clearCachePromise(customKey) {
     return new Promise( (resolve, reject) => {
       if (!customKey) {
         console.log('recachegoose.clearCache(): clearing entire cache');
@@ -67,7 +67,7 @@ class GooseCache {
 
 
 
-  async get(key) {
+  async getPromise(key) {
     return new Promise( (resolve, reject) => {
       this.cache.get(key, (err, res) => {
         if (err) {
@@ -87,7 +87,7 @@ class GooseCache {
 
 
 
-  async set(key, value, ttl) {
+  async setPromise(key, value, ttl) {
     if (ttl === 0) ttl = -1;
     return new Promise( (resolve, reject) => {
       this.cache.set(key, value, ttl, (err, res) => {
