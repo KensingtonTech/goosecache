@@ -48,9 +48,12 @@ module.exports = function(mongoose, gooseCache) {
       const onCachedResults = (err, cachedResults) => {
 
         console.log('mongoose.Query.prototype.exec(): cached result callback');
-        console.log('callback:', callback);
+        // console.log('callback:', callback);
 
-        if (cachedResults != null) {
+        if (![undefined, null].includes(cachedResults)) {
+          if (typeof cachedResults === 'string') {
+            cachedResults = JSON.parse(cachedResults);
+          }
           // we got a cached result!
           console.log('mongoose.Query.prototype.exec(): got a cached result!');
           // console.log('mongoose.Query.prototype.exec(): typeof cachedResults:', typeof cachedResults);
@@ -128,7 +131,7 @@ module.exports = function(mongoose, gooseCache) {
 
       if (cacheGetScript) {
         console.log('mongoose.Query.prototype.exec(): Getting results from cache with script', cacheGetScript);
-        const args = [ cacheGetScript, ...cacheGetScriptArgs, (err, results) => onCachedResults(err, JSON.parse(results)) ];
+        const args = [ cacheGetScript, ...cacheGetScriptArgs, (err, results) => onCachedResults(err, results) ];
         gooseCache.evalSha(...args);
       }
       else {
