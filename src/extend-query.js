@@ -59,12 +59,14 @@ module.exports = function(mongoose, gooseCache, logger) {
           }
           // we got a cached result!
           log.debug('mongoose.Query.prototype.exec(): got a cached result!');
-          // log.debug('mongoose.Query.prototype.exec(): typeof cachedResults:', typeof cachedResults);
-          // log.debug('mongoose.Query.prototype.exec(): cachedResults:', cachedResults);
+          log.debug('mongoose.Query.prototype.exec(): typeof cachedResults:', typeof cachedResults);
+          log.debug('mongoose.Query.prototype.exec(): cachedResults:', cachedResults);
 
           if (isCount) { // was the operation of type count?
             log.debug('mongoose.Query.prototype.exec(): was count-y');
+            log.debug('mongoose.Query.prototype.exec(): Running callback()');
             callback(null, cachedResults);
+            log.debug('mongoose.Query.prototype.exec(): Returning with resolve()');
             return resolve(cachedResults);
           }
 
@@ -134,11 +136,12 @@ module.exports = function(mongoose, gooseCache, logger) {
 
       if (cacheGetScript) {
         log.debug('mongoose.Query.prototype.exec(): Getting results from cache with script', cacheGetScript);
+        log.debug('mongoose.Query.prototype.exec(): script arguments:', cacheGetScriptArgs);
         const args = [ cacheGetScript, ...cacheGetScriptArgs, (err, results) => onCachedResults(err, results) ];
         gooseCache.evalSha(...args);
       }
       else {
-        log.debug('mongoose.Query.prototype.exec(): Getting results from cache with cache.get()');
+        log.debug('mongoose.Query.prototype.exec(): Getting results from cache with cache.get(), key:', key);
         gooseCache.get(key, onCachedResults);
       }
     });
@@ -147,6 +150,8 @@ module.exports = function(mongoose, gooseCache, logger) {
 
 
   mongoose.Query.prototype.cache = function(ttl = 60, customKey = '') {
+    log.debug('mongoose.Query.prototype.cache(): customKey:', customKey);
+    log.debug('mongoose.Query.prototype.cache(): ttl:', ttl);
     if (typeof ttl === 'string') {
       customKey = ttl;
       ttl = 60;
@@ -160,6 +165,7 @@ module.exports = function(mongoose, gooseCache, logger) {
 
 
   mongoose.Query.prototype.setDerivedKey = function(derivedKey) {
+    log.debug('mongoose.Query.prototype.setDerivedKey(): derivedKey:', derivedKey);
     this._derivedKey = derivedKey; // derivedKey means to take the key name from the results of the mongoose query
     return this;
   };
@@ -169,9 +175,10 @@ module.exports = function(mongoose, gooseCache, logger) {
   mongoose.Query.prototype.cacheGetScript = function(script) {
     // will fetch results using this preloaded script hash instead of redis.get()
     this._cacheGetScript = script;
+    log.debug('mongoose.Query.prototype.cacheGetScript(): script:', script);
     if (arguments.length > 1) {
       this._cacheGetScriptArgs = Array.prototype.slice.call(arguments).slice(1);
-      log.debug('_cacheGetScriptArgs:', this._cacheGetScriptArgs);
+      log.debug('mongoose.Query.prototype.cacheGetScript(): _cacheGetScriptArgs:', this._cacheGetScriptArgs);
     }
     return this;
   };
@@ -179,11 +186,12 @@ module.exports = function(mongoose, gooseCache, logger) {
 
 
   mongoose.Query.prototype.postCacheSetScript = function(script) {
+    log.debug('mongoose.Query.prototype.postCacheSetScript(): script:', script);
     // will run this script after running redis.set()
     this._postCacheScript = script;
     if (arguments.length > 1) {
       this._postCacheScriptArgs = Array.prototype.slice.call(arguments).slice(1);
-      log.debug('_postCacheScriptArgs:', this._postCacheScriptArgs);
+      log.debug('mongoose.Query.prototype.postCacheSetScript(): _postCacheScriptArgs:', this._postCacheScriptArgs);
     }
     return this;
   };
@@ -191,6 +199,7 @@ module.exports = function(mongoose, gooseCache, logger) {
 
 
   mongoose.Query.prototype.postCacheSetDeriveLastArg = function(derivedKey) {
+    log.debug('mongoose.Query.prototype.postCacheSetDeriveLastArg(): derivedKey:', derivedKey);
     // will run this script after running redis.set()
     this._postCacheScriptDeriveLastArg = derivedKey;
     return this;
@@ -199,6 +208,7 @@ module.exports = function(mongoose, gooseCache, logger) {
 
 
   mongoose.Query.prototype.getCacheKey = function() {
+    log.debug('mongoose.Query.prototype.getCacheKey()');
     const key = {
       model: this.model.modelName,
       op: this.op,
@@ -219,6 +229,7 @@ module.exports = function(mongoose, gooseCache, logger) {
 
 
 function hydrateModel(model, data) {
+  log.debug('mongoose.Query.prototype.hydrateModel()');
   return model.hydrate(data);
 }
 

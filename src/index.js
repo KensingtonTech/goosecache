@@ -32,30 +32,30 @@ class GooseCache {
 
 
 
-  clearCache(customKey, cb = noop) {
-    if (!customKey) {
+  clearCache(key, cb = noop) {
+    log.debug('recachegoose.clearCache(): key:', key);
+    if (!key) {
       log.info('recachegoose.clearCache(): clearing entire cache');
       this.clear(cb);
       return;
     }
 
-    log.info('recachegoose.clearCache(): clearing cache for key', customKey);
-    this.del(customKey, cb);
+    this.del(key, cb);
   }
 
 
 
-  async clearCachePromise(customKey) {
+  async clearCachePromise(key) {
+    log.debug('recachegoose.clearCachePromise(): key:', key);
     return new Promise( (resolve, reject) => {
-      if (!customKey) {
+      if (!key) {
         log.info('recachegoose.clearCache(): clearing entire cache');
         this.clear( () => {
           return resolve();
         });
       }
       else {
-        log.info('recachegoose.clearCache(): clearing cache for key', customKey);
-        this.del(customKey, () => {
+        this.del(key, () => {
           return resolve();
         });
       }
@@ -66,12 +66,14 @@ class GooseCache {
 
 
   get(key, cb = noop) {
+    log.debug('recachegoose.get(): key:', key);
     return this.cache.get(key, cb);
   }
 
 
 
   async getPromise(key) {
+    log.debug('recachegoose.getPromise(): key:', key);
     return new Promise( (resolve, reject) => {
       this.cache.get(key, (err, res) => {
         if (err) {
@@ -85,6 +87,7 @@ class GooseCache {
 
 
   set(key, value, ttl, cb = noop) {
+    log.debug('recachegoose.set(): key:', key);
     if (ttl === 0) ttl = -1;
     return this.cache.set(key, value, ttl, cb);
   };
@@ -92,6 +95,7 @@ class GooseCache {
 
 
   async setPromise(key, value, ttl) {
+    log.debug('recachegoose.setPromise(), key:', key);
     if (ttl === 0) ttl = -1;
     return new Promise( (resolve, reject) => {
       this.cache.set(key, value, ttl, (err, res) => {
@@ -106,6 +110,7 @@ class GooseCache {
 
 
   evalSha(...args) {
+    log.debug('recachegoose.evalSha(): args:', args);
     // cb must be provided as final argument
     if (this.cache.options.engine === 'redis') {
       const redis = this.cache._engine.client;
@@ -117,18 +122,21 @@ class GooseCache {
 
 
   del(key, cb = noop) {
+    log.debug('recachegoose.del(): key', key);
     return this.cache.del(key, cb);
   };
 
 
 
   clear(cb = noop) {
+    log.debug('recachegoose.clear()');
     return this.cache.clear(cb);
   }
 
 
 
   get redis() {
+    log.debug('recachegoose.redis()');
     if (this.options.engine === 'redis') {
       return this.cache._engine.client;
     }
