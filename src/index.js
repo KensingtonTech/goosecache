@@ -1,12 +1,13 @@
 'use strict';
 
 const Cacheman = require('@kensingtontech/recacheman');
+const loglevel = require('loglevel');
 
 const noop = () => {};
 
 class GooseCache {
 
-  constructor(mongoose, options = {}) {
+  constructor(mongoose, options = {}, logLevel = 'warn') {
     if (typeof mongoose.Model.hydrate !== 'function') {
       throw new Error('Cachegoose is only compatible with versions of mongoose that implement the `model.hydrate` method');
     }
@@ -15,27 +16,31 @@ class GooseCache {
       return;
     }
 
+    this.log = loglevel();
+    this.log.setLevel(logLevel);
+
     this.options = options;
 
     this.hasRun = true;
 
     this.cache = new Cacheman(null, options);
 
-    require('./extend-query')(mongoose, this);
+    require('./extend-query')(mongoose, this, this.log);
 
-    require('./extend-aggregate')(mongoose, this);
+    require('./extend-aggregate')(mongoose, this, this.log);
+
   }
 
 
 
   clearCache(customKey, cb = noop) {
     if (!customKey) {
-      console.log('recachegoose.clearCache(): clearing entire cache');
+      this.log.info('recachegoose.clearCache(): clearing entire cache');
       this.clear(cb);
       return;
     }
 
-    console.log('recachegoose.clearCache(): clearing cache for key', customKey);
+    this.log.info('recachegoose.clearCache(): clearing cache for key', customKey);
     this.del(customKey, cb);
   }
 
@@ -44,13 +49,13 @@ class GooseCache {
   async clearCachePromise(customKey) {
     return new Promise( (resolve, reject) => {
       if (!customKey) {
-        console.log('recachegoose.clearCache(): clearing entire cache');
+        this.log.info('recachegoose.clearCache(): clearing entire cache');
         this.clear( () => {
           return resolve();
         });
       }
       else {
-        console.log('recachegoose.clearCache(): clearing cache for key', customKey);
+        this.log.info('recachegoose.clearCache(): clearing cache for key', customKey);
         this.del(customKey, () => {
           return resolve();
         });

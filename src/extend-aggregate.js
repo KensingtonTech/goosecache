@@ -4,9 +4,11 @@ const generateKey = require('./generate-key');
 const noop = () => {};
 
 let hasBeenExtended = false;
+let log;
 
-module.exports = function(mongoose, cache) {
+module.exports = function(mongoose, cache, logger) {
   const aggregate = mongoose.Model.aggregate;
+  log = logger;
 
   mongoose.Model.aggregate = function() {
     const res = aggregate.apply(this, arguments);
@@ -33,24 +35,24 @@ module.exports = function(mongoose, cache) {
 
       return new Promise((resolve, reject) => {
 
-        console.log('getting results from cache with cache.get()');
+        log.debug('getting results from cache with cache.get()');
         cache.get(key, (err, cachedResults) => { //eslint-disable-line handle-callback-err
           if (cachedResults != null) {
-            console.log('got a cached result!');
+            log.debug('got a cached result!');
 
             // cachedResults = recoverObjectId(mongoose, cachedResults);
-            console.log('running callback()');
+            log.debug('running callback()');
             callback(null, cachedResults);
-            console.log('returning with resolve()');
+            log.debug('returning with resolve()');
             return resolve(cachedResults);
           }
 
-          console.log('didn\'t find a cached result :( -- fetching from mongo');
+          log.debug('didn\'t find a cached result :( -- fetching from mongo');
 
           mongooseExec
             .call(this)
             .then( (results) => {
-              console.log('setting result in cache with cache.set()');
+              log.debug('setting result in cache with cache.set()');
               cache.set(key, results, ttl, () => {
                 callback(null, results);
                 resolve(results);
