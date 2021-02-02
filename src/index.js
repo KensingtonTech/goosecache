@@ -1,7 +1,7 @@
 'use strict';
 
 const Cacheman = require('@kensingtontech/recacheman');
-const loglevel = require('loglevel');
+const log = require('loglevel');
 
 const noop = () => {};
 
@@ -16,8 +16,7 @@ class GooseCache {
       return;
     }
 
-    this.log = loglevel();
-    this.log.setLevel(logLevel);
+    log.setLevel(logLevel);
 
     this.options = options;
 
@@ -25,9 +24,9 @@ class GooseCache {
 
     this.cache = new Cacheman(null, options);
 
-    require('./extend-query')(mongoose, this, this.log);
+    require('./extend-query')(mongoose, this, log);
 
-    require('./extend-aggregate')(mongoose, this, this.log);
+    require('./extend-aggregate')(mongoose, this, log);
 
   }
 
@@ -35,12 +34,12 @@ class GooseCache {
 
   clearCache(customKey, cb = noop) {
     if (!customKey) {
-      this.log.info('recachegoose.clearCache(): clearing entire cache');
+      log.info('recachegoose.clearCache(): clearing entire cache');
       this.clear(cb);
       return;
     }
 
-    this.log.info('recachegoose.clearCache(): clearing cache for key', customKey);
+    log.info('recachegoose.clearCache(): clearing cache for key', customKey);
     this.del(customKey, cb);
   }
 
@@ -49,13 +48,13 @@ class GooseCache {
   async clearCachePromise(customKey) {
     return new Promise( (resolve, reject) => {
       if (!customKey) {
-        this.log.info('recachegoose.clearCache(): clearing entire cache');
+        log.info('recachegoose.clearCache(): clearing entire cache');
         this.clear( () => {
           return resolve();
         });
       }
       else {
-        this.log.info('recachegoose.clearCache(): clearing cache for key', customKey);
+        log.info('recachegoose.clearCache(): clearing cache for key', customKey);
         this.del(customKey, () => {
           return resolve();
         });
