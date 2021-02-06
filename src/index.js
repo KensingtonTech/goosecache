@@ -33,7 +33,7 @@ class GooseCache {
 
 
   clearCache(key, cb = noop) {
-    log.debug('recachegoose.clearCache(): key:', key);
+    log.info('recachegoose.clearCache(): key:', key);
     if (!key) {
       log.info('recachegoose.clearCache(): clearing entire cache');
       this.clear(cb);
@@ -46,7 +46,7 @@ class GooseCache {
 
 
   async clearCachePromise(key) {
-    log.debug('recachegoose.clearCachePromise(): key:', key);
+    log.info('recachegoose.clearCachePromise(): key:', key);
     return new Promise( (resolve, reject) => {
       if (!key) {
         log.info('recachegoose.clearCache(): clearing entire cache');
@@ -66,14 +66,14 @@ class GooseCache {
 
 
   get(key, cb = noop) {
-    log.debug('recachegoose.get(): key:', key);
+    log.info('recachegoose.get(): key:', key);
     return this.cache.get(key, cb);
   }
 
 
 
   async getPromise(key) {
-    log.debug('recachegoose.getPromise(): key:', key);
+    log.info('recachegoose.getPromise(): key:', key);
     return new Promise( (resolve, reject) => {
       this.cache.get(key, (err, res) => {
         if (err) {
@@ -87,7 +87,7 @@ class GooseCache {
 
 
   set(key, value, ttl, cb = noop) {
-    log.debug('recachegoose.set(): key:', key);
+    log.info('recachegoose.set(): key:', key);
     if (ttl === 0) ttl = -1;
     return this.cache.set(key, value, ttl, cb);
   };
@@ -95,7 +95,7 @@ class GooseCache {
 
 
   async setPromise(key, value, ttl) {
-    log.debug('recachegoose.setPromise(), key:', key);
+    log.info('recachegoose.setPromise(), key:', key);
     if (ttl === 0) ttl = -1;
     return new Promise( (resolve, reject) => {
       this.cache.set(key, value, ttl, (err, res) => {
@@ -110,7 +110,7 @@ class GooseCache {
 
 
   evalSha(...args) {
-    log.debug('recachegoose.evalSha(): args:', args);
+    log.info('recachegoose.evalSha(): args:', args);
     // cb must be provided as final argument
     if (this.cache.options.engine === 'redis') {
       const redis = this.cache._engine.client;
@@ -122,15 +122,17 @@ class GooseCache {
 
 
   async evalShaPromise(...args) {
-    log.debug('recachegoose.evalShaPromise(): args:', args);
+    log.info('recachegoose.evalShaPromise(): args:', args);
     if (this.cache.options.engine === 'redis') {
       const redis = this.cache._engine.client;
       return new Promise( (resolve, reject) => {
-        redis.evalsha([...args, (err, res) => {
+        redis.evalsha(...[...args, (err, res) => {
           if (err) {
-            return reject(err);
+            reject(err);
           }
-          return resolve(res);
+          else {
+            resolve(res);
+          }
         }]);
       });
     }
@@ -140,21 +142,21 @@ class GooseCache {
 
 
   del(key, cb = noop) {
-    log.debug('recachegoose.del(): key', key);
+    log.info('recachegoose.del(): key', key);
     return this.cache.del(key, cb);
   };
 
 
 
   clear(cb = noop) {
-    log.debug('recachegoose.clear()');
+    log.info('recachegoose.clear()');
     return this.cache.clear(cb);
   }
 
 
 
   get redis() {
-    log.debug('recachegoose.redis()');
+    log.info('recachegoose.redis()');
     if (this.options.engine === 'redis') {
       return this.cache._engine.client;
     }

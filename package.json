@@ -1,6 +1,6 @@
 {
   "name": "goosecache",
-  "version": "9.0.11",
+  "version": "9.0.12",
   "description": "Mongoose cacheing",
   "main": "index.js",
   "directories": {
