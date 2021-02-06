@@ -14,15 +14,15 @@ export interface GooseCacheOptions {
 
 
 export declare class GooseCache {
-	constructor(mongoose: Mongoose, cacheOptions: GooseCacheOptions, logLevel?: 'trace' | 'debug' | 'info' | 'warn' | 'error'): void;
-	clearCache(key: string | null, cb?: function): void;
-	async clearCachePromise(key: string | null): Promise<void>;
-	get(key: string, cb?: function);
-	async getPromise(key: string);
-	set(key: string, value: any, ttl: number, cb?: function);
-	async setPromise(key: string, value: any, ttl: number);
+	constructor(mongoose: Mongoose, cacheOptions: GooseCacheOptions, logLevel?: 'trace' | 'debug' | 'info' | 'warn' | 'error');
+	clearCache(key: string | null, cb?: () => void): void;
+	clearCachePromise(key: string | null): Promise<void>;
+	get(key: string, cb?: () => void);
+	getPromise(key: string): Promise<any>;
+	set(key: string, value: any, ttl: number, cb?: () => void);
+	setPromise(key: string, value: any, ttl: number): Promise<any>;
 	evalSha(...args);
-	async evalShaPromise(...args);
+	evalShaPromise(...args): Promise<any>;
 	redis: RedisClient;
 }
 

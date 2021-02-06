@@ -126,8 +126,11 @@ class GooseCache {
     if (this.cache.options.engine === 'redis') {
       const redis = this.cache._engine.client;
       return new Promise( (resolve, reject) => {
-        redis.evalsha([...args, () => {
-          return resolve();
+        redis.evalsha([...args, (err, res) => {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
         }]);
       });
     }
