@@ -121,6 +121,21 @@ class GooseCache {
 
 
 
+  async evalShaPromise(...args) {
+    log.debug('recachegoose.evalShaPromise(): args:', args);
+    if (this.cache.options.engine === 'redis') {
+      const redis = this.cache._engine.client;
+      return new Promise( (resolve, reject) => {
+        redis.evalsha([...args, () => {
+          return resolve();
+        }]);
+      });
+    }
+    throw new Error('Engine is not redis');
+  }
+
+
+
   del(key, cb = noop) {
     log.debug('recachegoose.del(): key', key);
     return this.cache.del(key, cb);

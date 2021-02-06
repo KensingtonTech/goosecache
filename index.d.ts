@@ -22,6 +22,7 @@ export declare class GooseCache {
 	set(key: string, value: any, ttl: number, cb?: function);
 	async setPromise(key: string, value: any, ttl: number);
 	evalSha(...args);
+	async evalShaPromise(...args);
 	redis: RedisClient;
 }
 
