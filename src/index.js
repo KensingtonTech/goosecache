@@ -40,7 +40,7 @@ class GooseCache {
       return;
     }
 
-    this.del(key, cb);
+    this.unlink(key, cb);
   }
 
 
@@ -55,7 +55,7 @@ class GooseCache {
         });
       }
       else {
-        this.del(key, () => {
+        this.unlink(key, () => {
           return resolve();
         });
       }
@@ -141,9 +141,9 @@ class GooseCache {
 
 
 
-  del(key, cb = noop) {
-    log.info('recachegoose.del(): key', key);
-    return this.cache.del(key, cb);
+  unlink(key, cb = noop) {
+    log.info('recachegoose.unlink(): key', key);
+    return this.cache.unlink(key, cb);
   };
 
 
