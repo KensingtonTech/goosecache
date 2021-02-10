@@ -22,7 +22,7 @@ class GooseCache {
 
     this.hasRun = true;
 
-    this.cache = new Cacheman(null, options);
+    this.recacheman = new Cacheman(null, options);
 
     require('./extend-query')(mongoose, this, log);
 
@@ -40,7 +40,7 @@ class GooseCache {
       return;
     }
 
-    this.unlink(key, cb);
+    this.del(key, cb);
   }
 
 
@@ -55,7 +55,7 @@ class GooseCache {
         });
       }
       else {
-        this.unlink(key, () => {
+        this.del(key, () => {
           return resolve();
         });
       }
@@ -67,7 +67,7 @@ class GooseCache {
 
   get(key, cb = noop) {
     log.info('recachegoose.get(): key:', key);
-    return this.cache.get(key, cb);
+    return this.recacheman.get(key, cb);
   }
 
 
@@ -75,7 +75,7 @@ class GooseCache {
   async getPromise(key) {
     log.info('recachegoose.getPromise(): key:', key);
     return new Promise( (resolve, reject) => {
-      this.cache.get(key, (err, res) => {
+      this.recacheman.get(key, (err, res) => {
         if (err) {
           return reject(err);
         }
@@ -89,7 +89,7 @@ class GooseCache {
   set(key, value, ttl, cb = noop) {
     log.info('recachegoose.set(): key:', key);
     if (ttl === 0) ttl = -1;
-    return this.cache.set(key, value, ttl, cb);
+    return this.recacheman.set(key, value, ttl, cb);
   };
 
 
@@ -98,7 +98,7 @@ class GooseCache {
     log.info('recachegoose.setPromise(), key:', key);
     if (ttl === 0) ttl = -1;
     return new Promise( (resolve, reject) => {
-      this.cache.set(key, value, ttl, (err, res) => {
+      this.recacheman.set(key, value, ttl, (err, res) => {
         if (err) {
           return reject(err);
         }
@@ -112,8 +112,8 @@ class GooseCache {
   evalSha(...args) {
     log.info('recachegoose.evalSha(): args:', args);
     // cb must be provided as final argument
-    if (this.cache.options.engine === 'redis') {
-      const redis = this.cache._engine.client;
+    if (this.recacheman.options.engine === 'redis') {
+      const redis = this.recacheman._engine.client;
       return redis.evalsha(...args);
     }
     throw new Error('Engine is not redis');
@@ -123,8 +123,8 @@ class GooseCache {
 
   async evalShaPromise(...args) {
     log.info('recachegoose.evalShaPromise(): args:', args);
-    if (this.cache.options.engine === 'redis') {
-      const redis = this.cache._engine.client;
+    if (this.recacheman.options.engine === 'redis') {
+      const redis = this.recacheman._engine.client;
       return new Promise( (resolve, reject) => {
         redis.evalsha(...[...args, (err, res) => {
           if (err) {
@@ -141,16 +141,17 @@ class GooseCache {
 
 
 
-  unlink(key, cb = noop) {
+  del(key, cb = noop) {
+    // is actually unlink() within recacheman-redis
     log.info('recachegoose.unlink(): key', key);
-    return this.cache.unlink(key, cb);
+    return this.recacheman.del(key, cb);
   };
 
 
 
   clear(cb = noop) {
     log.info('recachegoose.clear()');
-    return this.cache.clear(cb);
+    return this.recacheman.clear(cb);
   }
 
 
@@ -158,7 +159,7 @@ class GooseCache {
   get redis() {
     log.info('recachegoose.redis()');
     if (this.options.engine === 'redis') {
-      return this.cache._engine.client;
+      return this.recacheman._engine.client;
     }
     throw new Error('Engine is not redis');
   }
