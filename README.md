@@ -6,13 +6,10 @@
 - New methods that return a promise: clearCachePromise(), getPromise(), setPromise()
 - Added ability to access Redis client through accessor gooseCache.redis
 - Eliminated redundant calls to Redis
-- Eliminated unnecessary recoverObjectId
 - Eliminated unneeded additional Cache layer in favour of a single GooseCache class
 - Reimplemented as JavaScript class
 - A prefix is no longer added to Redis keys
 - Replaced [cacheman](https://github.com/cayasso/cacheman) with [recacheman](https://github.com/aalfiann/recacheman)
-
-### Note: Query aggregation has not yet been updated.  And there is now tons of debugging code in the lib, which is admittedly ugly.  It will be removed in the near future.  Stay tuned.
 
 # GooseCache #
 
@@ -23,48 +20,58 @@
 A Mongoose cacheing module, with Redis Lua scripting support.
 
 > Important:  
-  Compatible only with versions of Mongoose >= 5.0.0.
-
-
+  Compatible with Mongoose >= 6.0.0 < 7.
 
 ## Usage ##
 
 - Use In Memory
 ```javascript
-var mongoose = require('mongoose');
-var cachegoose = require('recachegoose');
+const mongoose = require('mongoose');
+const goosecache = require('goosecache');
 
-cachegoose(mongoose, {
-  engine: 'memory'
-});
+goosecache(
+  mongoose,
+  {
+    engine: 'memory'
+  }
+);
 ```
 
 - Use File
 ```javascript
-var mongoose = require('mongoose');
-var cachegoose = require('recachegoose');
+const mongoose = require('mongoose');
+const goosecache = require('goosecache');
 
-cachegoose(mongoose, {
-  engine: 'file'
-});
+goosecache(
+  mongoose,
+  {
+    engine: 'file'
+  }
+);
 ```
 
 - Use Redis
 ```javascript
-var mongoose = require('mongoose');
-var cachegoose = require('recachegoose');
+const mongoose = require('mongoose');
+const goosecache = require('goosecache');
 
-cachegoose(mongoose, {
-  engine: 'redis',
-  port: 6379,
-  host: 'localhost'
-});
+goosecache(
+  mongoose,
+  {
+    engine: 'redis',
+    port: 6379,
+    host: 'localhost'
+  }
+);
 
 // or with redis connection string
-cachegoose(mongoose, {
-  engine: 'redis',
-  client: require('redis').createClient('redis://localhost:6379')
-});
+goosecache(
+  mongoose,
+  {
+    engine: 'redis',
+    client: require('redis').createClient('redis://localhost:6379')
+  }
+);
 ```
 
 - Set Cache
@@ -88,7 +95,7 @@ Record
 You can also pass a custom key into the `.cache()` method, which you can then use later to clear the cached content.
 
 ```javascript
-var userId = '1234567890';
+const userId = '1234567890';
 
 Children
   .find({ parentId: userId })
@@ -99,7 +106,7 @@ Children
 
 ChildrenSchema.post('save', function(child) {
   // Clear the parent's cache, since a new child has been added.
-  cachegoose.clearCache(child.parentId + '-children');
+  goosecache.clearCache(child.parentId + '-children');
 });
 ```
 
@@ -109,7 +116,7 @@ Insert `.cache()` into the queries you want to cache, and they will be cached.  
 
 If you want to clear the cache for a specific query, you must specify the cache key yourself:
 
-```js
+```javascript
 function getChildrenByParentId(parentId, cb) {
   Children
     .find({ parentId })
@@ -118,15 +125,15 @@ function getChildrenByParentId(parentId, cb) {
 }
 
 function clearChildrenByParentIdCache(parentId, cb) {
-  cachegoose.clearCache(`${parentId}_children`, cb);
+  goosecache.clearCache(`${parentId}_children`, cb);
 }
 ```
 
-If you call `cachegoose.clearCache(null, cb)` without passing a cache key as the first parameter, the entire cache will be cleared for all queries.
+If you call `goosecache.clearCache(null, cb)` without passing a cache key as the first parameter, the entire cache will be cleared for all queries.
 
 ## Cacheing Populated Documents ##
 
-When a document is returned from the cache, cachegoose will [hydrate](http://mongoosejs.com/docs/api.html#model_Model.hydrate) it, which initializes it's virtuals/methods. Hydrating a populated document will discard any populated fields (see [Automattic/mongoose#4727](https://github.com/Automattic/mongoose/issues/4727)). To cache populated documents without losing child documents, you must use `.lean()`, however if you do this you will not be able to use any virtuals/methods (it will be a plain object).
+When a document is returned from the cache, goosecache will [hydrate](http://mongoosejs.com/docs/api.html#model_Model.hydrate) it, which initializes it's virtuals/methods. Hydrating a populated document will discard any populated fields (see [Automattic/mongoose#4727](https://github.com/Automattic/mongoose/issues/4727)). To cache populated documents without losing child documents, you must use `.lean()`, however if you do this you will not be able to use any virtuals/methods (it will be a plain object).
 
 ## Test ##
 npm test

@@ -1,6 +1,7 @@
 'use strict';
 
 const generateKey = require('./generate-key');
+const recoverObjectId = require('./recover-objectid');
 const noop = () => {};
 
 let hasBeenExtended = false;
@@ -39,9 +40,8 @@ module.exports = function(mongoose, cache, logger) {
         cache.get(key, (err, cachedResults) => { //eslint-disable-line handle-callback-err
           if (cachedResults != null) {
             log.debug('got a cached result!');
-
-            // cachedResults = recoverObjectId(mongoose, cachedResults);
             log.debug('running callback()');
+            cachedResults = recoverObjectId(mongoose, cachedResults);
             callback(null, cachedResults);
             log.debug('returning with resolve()');
             return resolve(cachedResults);
@@ -73,7 +73,6 @@ module.exports = function(mongoose, cache, logger) {
         customKey = ttl;
         ttl = 60;
       }
-
       this._ttl = ttl;
       this._key = customKey;
       return this;
@@ -85,5 +84,4 @@ module.exports = function(mongoose, cache, logger) {
       return generateKey(this._pipeline);
     };
   }
-
 };

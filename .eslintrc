@@ -5,7 +5,7 @@
     "es6": true
   },
   "parserOptions": {
-    "ecmaVersion": 8
+    "ecmaVersion": 11
   },
   "plugins": [
     "mocha"
@@ -101,12 +101,6 @@
     "no-cond-assign": [
       "error",
       "except-parens"
-    ],
-    "no-confusing-arrow": [
-      "error",
-      {
-        "allowParens": true
-      }
     ],
     "no-const-assign": "error",
     "no-debugger": "error",

@@ -1,8 +1,8 @@
 'use strict';
 
 const generateKey = require('./generate-key');
+const recoverObjectId = require('./recover-objectid');
 const noop = () => {};
-
 let log;
 
 
@@ -10,15 +10,13 @@ module.exports = function(mongoose, gooseCache, logger) {
   const mongooseExec = mongoose.Query.prototype.exec;
   log = logger;
 
-  mongoose.Query.prototype.exec = function(op, callback = noop ) {
-    // log.debug('typeof op:', typeof op);
-    // log.debug('typeof callback:', typeof callback);
-
+  /**
+   * Executes GooseCache query chain.  No other methods will have any effect without this.
+   */
+  mongoose.Query.prototype.exec = async function(op, callback = noop ) {
     if (!this.hasOwnProperty('_ttl')) { // _ttl is set by .cache()
-      // log.debug('didn\'t find _ttl -- running mongoose exec');
       return mongooseExec.apply(this, arguments);
     }
-
     log.debug('mongoose.Query.prototype.exec()');
 
     if (typeof op === 'function') {
@@ -29,29 +27,18 @@ module.exports = function(mongoose, gooseCache, logger) {
       this.op = op;
     }
 
-    let key = this._key || this.getCacheKey();
-    const derivedKey = this._derivedKey;
-
+    let key = this._key || this.getCacheKey(); // don't change || to ??
     const ttl = this._ttl;
-    const isCount = ['count', 'countDocuments', 'estimatedDocumentCount'].includes(this.op);
-    const isLean = this._mongooseOptions.lean;
+    const isCountOperation = ['count', 'countDocuments', 'estimatedDocumentCount'].includes(this.op);
+    const isLeanQuery = this._mongooseOptions.lean;
     const modelName = this.model.modelName;
+    const postCacheScriptArgs = this._postCacheScriptArgs ?? [];
 
-    const cacheGetScript = this._cacheGetScript;
-    const cacheGetScriptArgs = this._cacheGetScriptArgs || [];
-
-    const postCacheScript = this._postCacheScript;
-    const postCacheScriptArgs = this._postCacheScriptArgs || [];
-    const postCacheScriptDerivedKey = this._postCacheScriptDeriveLastArg;
-
-
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
 
       // eslint-disable-next-line handle-callback-err
-      const onCachedResults = (err, cachedResults) => {
-
-        log.debug('mongoose.Query.prototype.exec(): cached result callback');
-        // log.debug('callback:', callback);
+      const onCachedResultsFound = (err, cachedResults) => {
+        log.debug('mongoose.Query.prototype.exec(): cached result callback onCachedResultsFound()');
 
         if (![undefined, null].includes(cachedResults)) {
           if (typeof cachedResults === 'string') {
@@ -62,7 +49,7 @@ module.exports = function(mongoose, gooseCache, logger) {
           log.debug('mongoose.Query.prototype.exec(): typeof cachedResults:', typeof cachedResults);
           log.debug('mongoose.Query.prototype.exec(): cachedResults:', cachedResults);
 
-          if (isCount) { // was the operation of type count?
+          if (isCountOperation) { // was the operation of type count?
             log.debug('mongoose.Query.prototype.exec(): was count-y');
             log.debug('mongoose.Query.prototype.exec(): Running callback()');
             callback(null, cachedResults);
@@ -70,7 +57,7 @@ module.exports = function(mongoose, gooseCache, logger) {
             return resolve(cachedResults);
           }
 
-          if (!isLean) {
+          if (!isLeanQuery) {
             log.debug('mongoose.Query.prototype.exec(): wasn\'t lean');
             const model = mongoose.model(modelName);
             if (Array.isArray(cachedResults)) {
@@ -82,16 +69,12 @@ module.exports = function(mongoose, gooseCache, logger) {
             }
             else {
               log.debug('mongoose.Query.prototype.exec(): not an array -- now hydrating');
-              // log.debug('cachedResults:', cachedResults);
               cachedResults = hydrateModel(model, cachedResults);
             }
           }
           else {
-            // log.debug('is lean -- recovering ObjectId');
             log.debug('mongoose.Query.prototype.exec(): is lean');
-            // log.debug('cachedResults:', cachedResults);
-            // cachedResults = recoverObjectId(mongoose, cachedResults);
-            // log.debug('returned from recoverObjectId()');
+            cachedResults = recoverObjectId(mongoose, cachedResults);
           }
 
           log.debug('mongoose.Query.prototype.exec(): Running callback()');
@@ -105,22 +88,21 @@ module.exports = function(mongoose, gooseCache, logger) {
         mongooseExec
           .call(this)
           .then((results) => {
-            // log.debug('results:', results);
             log.debug('mongoose.Query.prototype.exec(): Setting result in cache with cache.set()');
-            if (derivedKey) {
-              key = results[derivedKey];
+            if (this._derivedKey) {
+              key = results[this._derivedKey];
               log.debug('mongoose.Query.prototype.exec(): Derived key result:', key);
             }
             gooseCache.set(key, results, ttl, () => {
-              if (postCacheScript && !postCacheScriptDerivedKey) {
+              if (this._postCacheScript && !this._postCacheScriptDeriveLastArg) {
                 log.debug('mongoose.Query.prototype.exec(): running postCacheScript');
-                gooseCache.evalSha(...[postCacheScript, ...postCacheScriptArgs, () => callback(null, results) ]);
+                gooseCache.evalSha(...[this._postCacheScript, ...postCacheScriptArgs, () => callback(null, results) ]);
               }
-              else if (postCacheScript && postCacheScriptDerivedKey) {
-                key = results[postCacheScriptDerivedKey];
+              else if (this._postCacheScript && this._postCacheScriptDeriveLastArg) {
+                key = results[this._postCacheScriptDeriveLastArg];
                 log.debug('mongoose.Query.prototype.exec(): Derived key result:', key);
                 log.debug('mongoose.Query.prototype.exec(): running postCacheScript');
-                gooseCache.evalSha(...[postCacheScript, ...postCacheScriptArgs, key, () => callback(null, results)]);
+                gooseCache.evalSha(...[this._postCacheScript, ...postCacheScriptArgs, key, () => callback(null, results)]);
               }
               else {
                 callback(null, results);
@@ -134,15 +116,19 @@ module.exports = function(mongoose, gooseCache, logger) {
           });
       };
 
-      if (cacheGetScript) {
-        log.debug('mongoose.Query.prototype.exec(): Getting results from cache with script', cacheGetScript);
-        log.debug('mongoose.Query.prototype.exec(): script arguments:', cacheGetScriptArgs);
-        const args = [ cacheGetScript, ...cacheGetScriptArgs, (err, results) => onCachedResults(err, results) ];
+      if (this._cacheGetScript) {
+        log.debug('mongoose.Query.prototype.exec(): Getting results from cache with script', this._cacheGetScript);
+        log.debug('mongoose.Query.prototype.exec(): script arguments:', this._cacheGetScriptArgs);
+        const args = [
+          this._cacheGetScript,
+          ...this._cacheGetScriptArgs,
+          (err, results) => onCachedResultsFound(err, results)
+        ];
         gooseCache.evalSha(...args);
       }
       else {
         log.debug('mongoose.Query.prototype.exec(): Getting results from cache with cache.get(), key:', key);
-        gooseCache.get(key, onCachedResults);
+        gooseCache.get(key, onCachedResultsFound);
       }
     });
   };
@@ -151,12 +137,10 @@ module.exports = function(mongoose, gooseCache, logger) {
 
   mongoose.Query.prototype.cache = function(ttl = 60, customKey = '') {
     log.debug('mongoose.Query.prototype.cache(): customKey:', customKey);
-    log.debug('mongoose.Query.prototype.cache(): ttl:', ttl);
     if (typeof ttl === 'string') {
       customKey = ttl;
       ttl = 60;
     }
-
     this._ttl = ttl;
     this._key = customKey;
     return this;
@@ -164,9 +148,9 @@ module.exports = function(mongoose, gooseCache, logger) {
 
 
 
-  mongoose.Query.prototype.setDerivedKey = function(derivedKey) {
-    log.debug('mongoose.Query.prototype.setDerivedKey(): derivedKey:', derivedKey);
-    this._derivedKey = derivedKey; // derivedKey means to take the key name from the results of the mongoose query
+  mongoose.Query.prototype.setDerivedKey = function(documentKey) {
+    log.debug('mongoose.Query.prototype.setDerivedKey(): documentKey:', documentKey);
+    this._derivedKey = documentKey; // derivedKey means to take the key name from the results of the mongoose query
     return this;
   };
 
@@ -232,4 +216,3 @@ function hydrateModel(model, data) {
   log.debug('mongoose.Query.prototype.hydrateModel()');
   return model.hydrate(data);
 }
-

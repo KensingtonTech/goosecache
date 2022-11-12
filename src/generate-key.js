@@ -16,11 +16,13 @@ function jsosort(obj, sortfunction) {
   return result;
 }
 
-module.exports = function init(obj) {
+module.exports = function(obj) {
   obj = jsosort(obj);
-  obj = JSON.stringify(obj, (key, val) => {
-    return val instanceof RegExp ? String(val) : val;
-  });
-
-  return sha1(obj);
+  const objStr = JSON.stringify(
+    obj,
+    (_, val) => val instanceof RegExp
+      ? String(val)
+      : val
+  );
+  return sha1(objStr);
 };
