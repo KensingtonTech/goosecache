@@ -16,7 +16,14 @@ let db;
 
 describe('goosecache', function() {
   before(async function() {
-    goosecache = new GooseCache(mongoose);
+    goosecache = new GooseCache(
+      mongoose,
+      {
+        engine: 'redis',
+        port: 6379,
+        host: 'redis'
+      }
+    );
     await mongoose.connect('mongodb://admin:password@mongo/');
     db = mongoose.connection;
     db.on('error', (err) => {
@@ -222,7 +229,7 @@ describe('goosecache', function() {
     );
   });
 
-  it('should cache aggregate queries that use callbacks', async (done) => {
+  it('should cache aggregate queries that use callbacks', (done) => {
     aggregate(
       60,
       async (err, res) => {

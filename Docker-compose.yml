@@ -11,8 +11,10 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=password
-      #- MONGO_INITDB_DATABASE=mongoose-goosecache-testing
     volumes:
       - /data/db
     ports:
       - "27020:27017/tcp"
+
+  redis:
+    image: redis:7
