@@ -1,10 +1,17 @@
 services:
 
-  server:
+  test:
     build:
-      dockerfile: Dockerfile-server
+      dockerfile: Dockerfile-test
     tty: true
-    command: npm run test
+    command: npm run test-code
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - .:/home/node:rw,cached
+      - /home/node/node_modules
+      - /home/node/.npm
 
   mongo:
     image: mongo:latest
@@ -18,3 +25,5 @@ services:
 
   redis:
     image: redis:7
+    volumes:
+      - /data

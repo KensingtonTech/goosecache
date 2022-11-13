@@ -4,7 +4,7 @@
 require('should');
 
 const mongoose = require('mongoose');
-const { GooseCache } = require('../dist');
+const { GooseCache } = require('../lib');
 const { v4: uuidV4 } = require('uuid');
 const Schema = mongoose.Schema;
 let goosecache;
@@ -78,7 +78,7 @@ describe('goosecache', function() {
     await goosecache.clearCache(null);
   });
 
-  it.skip('should throw an error if the hydrate method is undefined', function() {
+  it('should throw an error if the hydrate method is undefined', function() {
     const mongoose = {
       Model: {
         hydrate: undefined
@@ -87,7 +87,7 @@ describe('goosecache', function() {
     (() => new GooseCache(mongoose)).should.throw();
   });
 
-  it.skip('should not throw an error if the hydrate method exists', function() {
+  it('should not throw an error if the hydrate method exists', function() {
     (() => new GooseCache(mongoose)).should.not.throw();
   });
 

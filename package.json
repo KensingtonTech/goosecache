@@ -28,8 +28,10 @@
   },
   "scripts": {
     "build": "babel lib -D --out-dir dist && cp README.md LICENSE dist/",
-    "test": "npm run lint && npm run build && nyc --reporter=html --reporter=text mocha --exit",
-    "testnew": "npm run build && mocha",
+    "test-code": "npm run lint && nyc --reporter=html --reporter=text mocha --exit",
+    "test": "docker compose up -d mongo redis && docker compose up --build test",
+    "test-only": "docker compose up test",
+    "test-down": "docker compose down -v",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "lint": "eslint .",
     "prepublishOnly": "npm version patch -m \"Bumped patch to %s\""
