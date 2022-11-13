@@ -75,7 +75,7 @@ describe('goosecache', function() {
       TestModel.deleteMany(),
       TestModelTextId.deleteMany()
     ]);
-    await goosecache.clearCache(null);
+    await goosecache.clearCache();
   });
 
   it('should throw an error if the hydrate method is undefined', function() {
@@ -95,12 +95,26 @@ describe('goosecache', function() {
     await TestModel.find({}).cache.should.be.a.Function;
   });
 
-  it('should cache a simple query that uses callbacks', async function() {
-    let res = await getAll(60);
-    res.length.should.equal(10);
-    await generate(10);
-    res = await getAll(60);
-    await res.length.should.equal(10);
+  it('should cache a simple query that uses callbacks', (done) => {
+    getAll(
+      60,
+      async (err, res) => {
+        if (err) {
+          return done(err);
+        }
+        res.length.should.equal(10);
+        await generate(10);
+        getAll(
+          60,
+          (err, res) => {
+            if (err) {
+              return done(err);
+            }
+            res.length.should.equal(10);
+            done();
+          }
+        );
+      });
   });
 
   it('should cache a simple query that uses promises', async function() {
@@ -266,7 +280,7 @@ describe('goosecache', function() {
     await generate(10);
     const cached = await getAllCustomKey(60, 'custom-key');
     cached.length.should.equal(10);
-    await goosecache.clearCache('custom-key');
+    await goosecache.del('custom-key');
     const notCached = await getAllCustomKey(60, 'custom-key');
     notCached.length.should.equal(20);
   });
@@ -381,8 +395,8 @@ describe('goosecache', function() {
   });
 });
 
-async function getAll(ttl) {
-  return await TestModel.find({}).cache(ttl).exec();
+async function getAll(ttl, cb) {
+  return await TestModel.find({}).cache(ttl).exec(cb);
 }
 
 async function aggregateAll(ttl) {

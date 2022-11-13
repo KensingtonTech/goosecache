@@ -28,7 +28,7 @@
   },
   "scripts": {
     "build": "babel lib -D --out-dir dist && cp README.md LICENSE dist/",
-    "test-code": "npm run lint && nyc --reporter=html --reporter=text mocha --exit",
+    "test-code": "nyc --reporter=html --reporter=text mocha --exit",
     "test": "docker compose up -d mongo redis && docker compose up --build test",
     "test-only": "docker compose up test",
     "test-down": "docker compose down -v",

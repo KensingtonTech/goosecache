@@ -1,15 +1,19 @@
 > This is a fork of [recachegoose](https://github.com/aalfiann/recachegoose) with these differences:
 - Renamed to GooseCache
 - Includes TypeScript definitions
-- Added additional methods to Model.Query prototype: setDerivedKey(), cacheGetScript(), postCacheSetScript(), postCacheSetDeriveLastArg()
+- Breaking changes:
+  - Callback support has been removed from all GooseCache methods.  They are now promise-only.
+  - `goosecache.clearCache()` only clears the entire cache. Use `goosecache.del(key)` to clear an individual key.
+- Added additional methods to Model.Query prototype
+  - setDerivedKey()
+  - cacheGetScript()
+  - postCacheSetScript()
+  - postCacheSetDeriveLastArg()
 - Supports calls to custom Redis Lua scripts which have been loaded by script load, both for fetching documents with a Lua script, and for running a script immediately following a cache set, say for instance, for post-processing / indirection.
-- New methods that return a promise: clearCachePromise(), getPromise(), setPromise()
-- Added ability to access Redis client through accessor gooseCache.redis
+- Added ability to access Redis client through getter `gooseCache.redis`
 - Eliminated redundant calls to Redis
 - Eliminated unneeded additional Cache layer in favour of a single GooseCache class
-- Reimplemented as JavaScript class
 - A prefix is no longer added to Redis keys
-- Replaced [cacheman](https://github.com/cayasso/cacheman) with [recacheman](https://github.com/aalfiann/recacheman)
 
 # GooseCache #
 
@@ -64,7 +68,7 @@ goosecache(
   }
 );
 
-// or with redis connection string
+// or with client provided
 goosecache(
   mongoose,
   {
@@ -75,21 +79,17 @@ goosecache(
 ```
 
 - Set Cache
-```js
-Record
+```typescript
+await Record
   .find({ some_condition: true })
   .cache(30) // The number of seconds to cache the query.  Defaults to 60 seconds.
-  .exec(function(err, records) { // You are able to use callback or promise
-    ...
-  });
+  .exec(callback?: (err, records) => void); // You may use callback or promise
 
-Record
+await Record
   .aggregate()
   .group({ total: { $sum: '$some_field' } })
   .cache(0) // Explicitly passing in 0 will cache the results indefinitely.
-  .exec(function(err, aggResults) {
-    ...
-  });
+  .exec(callback?: (err, aggResults) => void); // You may use callback or promise
 ```
 
 You can also pass a custom key into the `.cache()` method, which you can then use later to clear the cached content.
