@@ -1,8 +1,7 @@
 {
   "name": "goosecache",
-  "version": "10.0.0",
+  "version": "0.0.1",
   "description": "Mongoose cacheing",
-  "main": "index.js",
   "directories": {
     "test": "test"
   },
@@ -28,9 +27,9 @@
     "uuid": "^9.0.0"
   },
   "scripts": {
-    "build": "babel src --out-dir dist",
-    "testold": "npm run lint && npm run build && nyc --reporter=html --reporter=text mocha --exit",
-    "test": "npm run build && mocha",
+    "build": "babel lib -D --out-dir dist && cp README.md LICENSE dist/",
+    "test": "npm run lint && npm run build && nyc --reporter=html --reporter=text mocha --exit",
+    "testnew": "npm run build && mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "lint": "eslint .",
     "prepublishOnly": "npm version patch -m \"Bumped patch to %s\""
