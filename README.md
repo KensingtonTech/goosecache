@@ -2,8 +2,11 @@
 - Renamed to GooseCache
 - Includes TypeScript definitions
 - Breaking changes:
+  - `goosecache.clearCache()` has been removed and replaced with `goosecache.clear()` and `goosecache.del(key: string)`
+  - `goosecache.clear()` clears the entire cache.
+  - `goosecache.del(key)` clears an individual cache key.
   - Callback support has been removed from all GooseCache methods.  They are now promise-only.
-  - `goosecache.clearCache()` only clears the entire cache. Use `goosecache.del(key)` to clear an individual key.
+  - Note that callbacks are still supported on the `exec()` methods.
 - Added additional methods to Model.Query prototype
   - setDerivedKey()
   - cacheGetScript()
@@ -68,7 +71,7 @@ goosecache(
   }
 );
 
-// or with client provided
+// or with Redis client provided
 goosecache(
   mongoose,
   {
@@ -94,42 +97,42 @@ await Record
 
 You can also pass a custom key into the `.cache()` method, which you can then use later to clear the cached content.
 
-```javascript
+```typescript
 const userId = '1234567890';
 
-Children
+const results = await Children
   .find({ parentId: userId })
   .cache(0, userId + '-children') /* Will create a redis entry          */
-  .exec(function(err, records) {  /* with the key '1234567890-children' */
-    ...
-  });
+  .exec(callback?: (err, aggResults) => void); // with the cache key '1234567890-children'
 
-ChildrenSchema.post('save', function(child) {
-  // Clear the parent's cache, since a new child has been added.
-  goosecache.clearCache(child.parentId + '-children');
-});
+// Clear the parent's cache, since a new child has been added.
+const child = await ChildrenSchema.post('save');
+await goosecache.del(child.parentId + '-children');
 ```
 
 Insert `.cache()` into the queries you want to cache, and they will be cached.  Works with `select`, `lean`, `sort`, and anything else that will modify the results of a query.
 
 ## Clearing the cache ##
 
+The cache can be cleared in two ways:
+
+* `gooseCache.clear()` - Clears entire cache.
+* `gooseCache.del(key: string)` - Clears a specific cache key.
+
 If you want to clear the cache for a specific query, you must specify the cache key yourself:
 
-```javascript
-function getChildrenByParentId(parentId, cb) {
+```typescript
+async function getChildrenByParentId(parentId: string) {
   Children
     .find({ parentId })
     .cache(0, `${parentId}_children`)
-    .exec(cb);
+    .exec();
 }
 
-function clearChildrenByParentIdCache(parentId, cb) {
-  goosecache.clearCache(`${parentId}_children`, cb);
+async function clearChildrenByParentIdCache(parentId: string) {
+  await goosecache.del(`${parentId}_children`);
 }
 ```
-
-If you call `goosecache.clearCache(null, cb)` without passing a cache key as the first parameter, the entire cache will be cleared for all queries.
 
 ## Cacheing Populated Documents ##
 

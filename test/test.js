@@ -75,7 +75,7 @@ describe('goosecache', function() {
       TestModel.deleteMany(),
       TestModelTextId.deleteMany()
     ]);
-    await goosecache.clearCache();
+    await goosecache.clear();
   });
 
   it('should throw an error if the hydrate method is undefined', function() {

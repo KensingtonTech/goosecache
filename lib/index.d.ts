@@ -15,7 +15,7 @@ export interface GooseCacheOptions {
 
 export declare class GooseCache {
 	constructor(mongoose: Mongoose, cacheOptions: GooseCacheOptions, logLevel?: 'trace' | 'debug' | 'info' | 'warn' | 'error');
-	clearCache(): Promise<void>;
+	clear(): Promise<void>;
 	del(key: string): Promise<void>;
 	get(key: string): Promise<any>;
 	set(key: string, value: any, ttl: number): Promise<any>;
