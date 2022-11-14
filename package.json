@@ -38,7 +38,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kensingtontech/goosecache.git"
+    "url": "https://github.com/TimUnderhay/goosecache.git"
   },
   "keywords": [
     "cache",
@@ -52,7 +52,7 @@
   "author": "Tim Underhay <tim.underhay@knowledgekta.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kensingtontech/goosecache/issues"
+    "url": "https://github.com/TimUnderhay/goosecache/issues"
   },
-  "homepage": "https://github.com/kensingtontech/goosecache"
+  "homepage": "https://github.com/TimUnderhay/goosecache"
 }
