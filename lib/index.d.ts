@@ -2,7 +2,6 @@ import { Mongoose } from 'mongoose';
 import { RedisClient } from 'redis';
 
 
-
 export interface GooseCacheOptions {
 	engine?: 'memory' | 'redis' | 'file';
 	port?: number;
@@ -11,10 +10,11 @@ export interface GooseCacheOptions {
 	client?: RedisClient;
 }
 
-
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error';
 
 export declare class GooseCache {
-	constructor(mongoose: Mongoose, cacheOptions: GooseCacheOptions, logLevel?: 'trace' | 'debug' | 'info' | 'warn' | 'error');
+	constructor(mongoose: Mongoose, cacheOptions: GooseCacheOptions, logLevel?: LogLevel);
+	setLogLevel(logLevel: LogLevel);
 	clear(): Promise<void>;
 	del(key: string): Promise<void>;
 	get(key: string): Promise<any>;
